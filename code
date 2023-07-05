@@ -1,0 +1,143 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+class Person{
+public:
+    Person(){
+        cout << "Person 默认构造函数" << endl;
+    }
+    Person(int age){
+        Age = age;
+        cout << "Person 有参构造函数" << endl;
+    }
+    Person(const Person &p){
+        // 将传入的人身上的属性传入到我身上
+        Age = p.Age;
+        cout << "Person 拷贝构造函数" << endl;
+    }
+    ~Person(){
+        cout << "Person 析构函数" << endl;
+    }
+    int Age = 0;
+};
+
+class Human{
+public:
+    Human(){
+        cout << "Human 默认构造函数" << endl;
+    }
+    Human(int age){
+        Age = age;
+        cout << "Human 有参构造函数" << endl;
+    }
+    Human(const Human &h){
+        // 将传入的人身上的属性传入到我身上
+        Age = h.Age;
+        cout << "Human 拷贝构造函数" << endl;
+    }
+    ~Human(){
+        cout << "Human 析构函数" << endl;
+    }
+    int Age = 0;
+};
+class Student{
+public:
+    Student(){
+        cout << "默认构造函数" << endl;
+    }
+    Student(int age, int height){
+        Age = age;
+        Height = new int(height);
+        cout << "有参构造函数" << endl;
+    }
+    Student(const Student & s){
+        Age = s.Age;
+        // Height = s.Height;     // 编译器默认实现(浅拷贝)，会导致堆区内存反复释放
+
+        //深拷贝
+        Height = new int(*s.Height);
+        cout << "拷贝构造函数" << endl;
+    }
+    ~Student(){
+        if(Height != NULL){
+            delete Height;
+            Height = NULL;
+        }
+        cout << "析构函数" << endl;
+    }
+    int Age = 0;
+    int* Height = NULL;
+};
+void test01(){
+    // 调用
+
+    // 1、括号法
+    Person p1;       // 调用默认构造函数的时候，不要加()，编译器会以为是一个函数声明，不会认为在创建对象
+    Person p2(10);
+    Person p3(p2);
+
+    // 2、显示法
+    Person p4 = Person(10); // 调用有参构造函数
+    Person p5 = Person(p4); // 调用拷贝构造函数
+    Person(10);      // 为一个匿名对象，当前行执行结束后会立即被释放
+    // Person(p5);    //不要利用拷贝构造函数初始化匿名对象，编译器会认为此句为 Person p5;  ,是一个对象声明，会导致重定义错误
+
+    //  3、隐式转换法
+    Person p6 = 10;       // 编译器会隐式转换为 Person p6 = Person(10);  调用有参构造
+    Person p7 = p6;       // 调用拷贝构造函数
+}
+
+// 使用一个已经创建完毕的对象来初始化一个新对象
+void test02(){
+    Person p1(10);
+    Person p2(p1);
+    cout << "p2的年龄为：" << p2.Age << endl;     // 输出10
+}
+
+// 值传递的方式给函数参数传值
+void doWork(Person p){
+
+}
+void test03(){
+    Person p;
+    doWork(p);    // 调用拷贝构造函数
+}
+
+// 以值方式返回局部对象
+Person doWork2(){
+    Person pd;
+    cout << &pd << endl;// 0x61fddc
+    return pd;
+}
+void test04(){
+    Person p = doWork2();    // 调用拷贝构造函数，但是被编译器进行RVO，即返回值优化，不显示调用
+    cout << &p << endl;// 0x61fddc
+}
+
+void test05(){
+    Person p1;
+    p1.Age = 18;
+    Person p2(p1);
+    cout << "p2的年龄：" << p2.Age << endl;
+    
+}
+void test06(){
+    // 注释掉 默认构造和拷贝构造
+    // 有参 析构 析构
+    // Human h1(28);
+    // Human h2(h1);
+}
+
+void test07(){
+    Student s1(18, 180);
+    cout << "s1的年龄：" << s1.Age << endl;
+    cout << "s1的身高：" << *s1.Height << endl;
+    Student s2(s1);
+    cout << "s2的年龄：" << s2.Age << endl;
+    cout << "s2的身高：" << *s2.Height << endl;
+}
+int main(){
+    test07();
+    return 0;
+}
